@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.env
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Logs / downloads (generated at runtime)
+dashboard/backend/downloads/*.txt
+dashboard/backend/myzipfile.zip
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Temp files
+~$*
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
