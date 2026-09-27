@@ -1,18 +1,21 @@
 <div align="center">
 
 # 🔬 KURNICUS
-### Kernel-Native Linux Security Telemetry Platform
+### Real-Time, Low-Power Security Telemetry & AI Detection for Any Linux / Edge Device
 
-*Lightweight, real-time OS monitoring and anomaly detection for Linux-based IoT, embedded, and automotive systems*
+*Detect threats at the edge in milliseconds — on hardware that sips power — with an AI analyst that explains every alert in plain English.*
 
-![Bash](https://img.shields.io/badge/Agent-Bash-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)
-![Python](https://img.shields.io/badge/Backend-Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
-![React](https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![AWS](https://img.shields.io/badge/Cloud-AWS%20S3%20%2B%20EC2-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
+![Python](https://img.shields.io/badge/API-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Postgres](https://img.shields.io/badge/Store-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Run-Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![React](https://img.shields.io/badge/UI-React%2018-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![AI](https://img.shields.io/badge/AI-NVIDIA%20NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white)
 
-![CPU Usage](https://img.shields.io/badge/CPU%20Overhead-%3C3%25-brightgreen?style=flat-square)
-![RAM](https://img.shields.io/badge/Min%20RAM-256%20MB-blue?style=flat-square)
-![Compliance](https://img.shields.io/badge/Compliance-ISO%2021434%20%7C%20NIST%20CSF-orange?style=flat-square)
+![Latency](https://img.shields.io/badge/Detection%20Latency-~3ms-brightgreen?style=flat-square)
+![Idle CPU](https://img.shields.io/badge/Idle%20CPU-~0%25-brightgreen?style=flat-square)
+![RAM](https://img.shields.io/badge/Footprint-~150%20MB-blue?style=flat-square)
+![Compliance](https://img.shields.io/badge/Automotive-UN%20R155%20%7C%20ISO%2021434-orange?style=flat-square)
+![MITRE](https://img.shields.io/badge/Mapped%20to-MITRE%20ATT%26CK-red?style=flat-square)
 
 </div>
 
@@ -20,168 +23,144 @@
 
 ## What is Kurnicus?
 
-Modern Linux environments are increasingly difficult to secure. Conventional monitoring tools typically raise alerts only after an issue has already caused damage, allowing hidden threats to persist undetected. Teams are burdened with multiple, fragmented tools that create blind spots and generate excessive false alarms.
+Kurnicus is a **host-based security monitoring and anomaly-detection platform** for Linux and edge devices. It collects OS telemetry (network, processes, memory, files, logins, and vehicle CAN bus), learns each device's *normal* behaviour, and flags anomalies **in real time** — then an optional AI analyst turns each alert into a plain-English explanation with a recommended fix.
 
-**Kurnicus solves this** — it is a full-stack Linux security telemetry platform delivering real-time OS-level monitoring and threat detection in a single, low-overhead package. It hooks directly into the Linux kernel to observe system calls, file access, process creation, and network activity, then streams all telemetry to a cloud-backed visualization dashboard.
+It is built for the devices big-tech tooling ignores: **automotive ECUs, IoT, industrial/OT, medical, kiosks, and constrained servers** — anything running Linux that can't afford a heavy agent or a round-trip to a GPU farm.
 
-| Component | Folder | Role |
-|-----------|--------|------|
-| **Agent** | `agent/` | Runs on target Linux machines — collects telemetry across 10+ OS subsystems and streams to AWS S3 |
-| **Dashboard** | `dashboard/` | Flask API + React frontend — fetches data from S3 and visualizes it in real time |
+**Two design principles make it different:**
+
+- **Detect at the edge, in milliseconds.** A streaming machine-learning model scores every event on the device's own CPU in ~3 ms — no GPU, no cloud round-trip required for detection.
+- **Explain, don't just alarm.** Every screen describes *what you're seeing, whether it's a problem, and what to do* — and an AI analyst is one click away for a deeper, plain-English breakdown.
 
 ---
 
 ## Why Kurnicus?
 
-### The Problem
-- Security tools today alert **after** damage is done — not in real time
-- Existing tools (Falco, Wazuh, Osquery) are too heavy for IoT and embedded Linux devices
-- Teams juggle multiple fragmented tools, creating blind spots and alert fatigue
-
-### The Kurnicus Advantage
-
-| Area | Prior Art Limitation | Kurnicus Innovation |
-|------|---------------------|---------------------|
-| **Efficiency** | Falco and Wazuh consume significant CPU/RAM | Operates under **3% CPU load** using lightweight syscall filtering |
-| **Integration** | Existing tools handle either security or performance, not both | Merges process, network, and file monitoring into a **unified stream** |
-| **Simplicity** | Prior tools require YAML/JSON rule tuning | Runs with **zero configuration** and self-adjusting thresholds |
-| **Scalability** | Most tools are server-centric | Supports **offline caching + cloud-sync** for thousands of edge nodes |
-
-> **Novel Feature:** Dual-mode event handling (real-time + offline sync) ensures continuous coverage even during intermittent connectivity — a capability absent in comparable monitoring frameworks.
+| Area | Typical tools (Falco / Wazuh / Osquery) | Kurnicus |
+|------|------------------------------------------|----------|
+| **Detection latency** | Batch / rule evaluation | **~3 ms per event** (streaming ML) |
+| **Idle power** | Constant polling | **~0% CPU** — event-driven (DB `LISTEN/NOTIFY`) |
+| **Footprint** | Heavy for embedded | **~150 MB RAM**, CPU-only, runs on a Raspberry Pi |
+| **Detection method** | Signatures / static rules | **Behavioural anomaly detection** that learns per-device baselines |
+| **Explainability** | Cryptic alerts | **Plain-English on every tab** + AI SOC analyst |
+| **Scope** | Server-centric | **Any device** — automotive, IoT, industrial, medical, servers |
+| **Setup** | YAML/JSON rule tuning | **One command** (`docker compose up`) + self-learning thresholds |
 
 ---
 
-## Architecture
+## Key Features
+
+### ⚡ Real-time detection engine
+- **Streaming anomaly detection** with [River](https://riverml.xyz) (Half-Space Trees) — online, incremental, pure-Python, CPU-only. Learns a separate baseline **per host and per data source**.
+- **Event-driven** via PostgreSQL `LISTEN/NOTIFY` — the detector sleeps until an event arrives, so idle power is near zero.
+- **Measured ~3 ms** end-to-end detection latency (event → scored), instrumented and shown live on the dashboard.
+- Per-host models are **persisted to disk**, so baselines survive reboots.
+- A complementary **Isolation Forest** batch detector for deeper offline sweeps.
+
+### 🤖 AI SOC analyst (optional)
+- Powered by **NVIDIA NIM** (OpenAI-compatible) — no local GPU needed.
+- **Explain any alert** → *Assessment · MITRE ATT&CK · Recommended action*, using the real telemetry (PIDs, IPs, hostnames).
+- **"Explain this page in plain English"** on every tab → *What this shows · Anything wrong? · What to do*.
+- The AI is **off the detection hot-path** — an offline device is still fully protected.
+
+### 🧭 Understandable by anyone
+- **Security Health Score** (0–100) — one number for "are my devices safe?"
+- **Action Center** (built into the dashboard) — a prioritized *"what to review, why it matters, and how to fix it"* to-do list.
+- Every log tab leads with plain-language explanations, charts, colour-coded status, and value-aware summaries — not raw numbers.
+- Per-row **"Why?"** explanations on suspicious network connections.
+- **Live-updating** dashboard.
+
+### 🌐 Multi-domain telemetry (configurable to any device)
+| Source | Detects |
+|--------|---------|
+| Network | Suspicious/unknown outbound connections, C2 "calling home" |
+| Live processes | Rogue/high-CPU programs (e.g. crypto-miners) |
+| Memory | Abnormal memory pressure |
+| Files | Access to sensitive files (e.g. credential stores) |
+| **Auth / login** | **Brute-force / password-guessing (MITRE T1110)** |
+| **CAN bus (automotive)** | **Message injection & bus flooding → UN R155 / ISO 21434** |
+
+Telemetry is stored as generic JSON events, so **adding a new source** (CPU temperature, disk/SMART, USB, GPS, Modbus/OT, syslog…) is just a payload + a feature function — the alerts, AI, and UI work automatically.
+
+---
+
+## Architecture (platform/)
 
 ```
-┌─────────────────────────────────────┐
-│         Target Linux Machine        │
-│  agent/SERVICEFILE/servicev2.sh     │
-│    ├── Network.sh   (tshark)        │
-│    ├── Liveprocess.sh  (top)        │
-│    ├── Memory.sh    (sar)           │
-│    ├── File_monitoring.sh (inotify) │
-│    ├── Kernel.sh    (dmesg)         │
-│    └── iostat / iotop / ioping ...  │
-└──────────────┬──────────────────────┘
-               │ HTTPS upload (TLS 1.3)
-               ▼
-┌─────────────────────────────────────┐
-│     EC2 Receiver (agent/Cloud/)     │
-└──────────────┬──────────────────────┘
-               │ boto3
-               ▼
-┌─────────────────────────────────────┐
-│          AWS S3 Bucket              │
-│       output/logs_*.txt             │
-└──────────────┬──────────────────────┘
-               │ boto3
-               ▼
-┌─────────────────────────────────────┐
-│   dashboard/backend (Flask API)     │
-└──────────────┬──────────────────────┘
-               │ REST API
-               ▼
-┌─────────────────────────────────────┐
-│   dashboard/frontend (React/Vite)   │
-│  Network · Memory · Process · File  │
-└─────────────────────────────────────┘
+        Monitored devices (Linux / ECU / IoT / server)
+        telemetry: network · process · memory · file · auth · CAN bus
+                              │  events (JSON)
+                              ▼
+                 ┌───────────────────────────┐
+                 │   PostgreSQL (events)      │
+                 │   JSONB payloads, per-host │
+                 └─────────────┬─────────────┘
+                 LISTEN/NOTIFY │ (push, no polling)
+              ┌────────────────┴───────────────┐
+              ▼                                 ▼
+   ┌────────────────────┐            ┌────────────────────┐
+   │ Streaming detector │            │  Batch detector    │
+   │ River HST (~3 ms)  │            │  Isolation Forest  │
+   └─────────┬──────────┘            └─────────┬──────────┘
+             └───────────────┬─────────────────┘
+                             ▼  alerts (severity · MITRE · standard_ref)
+                 ┌───────────────────────────┐
+                 │   FastAPI  (asyncpg)       │──►  AI SOC analyst (NVIDIA NIM)
+                 └─────────────┬─────────────┘
+                               ▼  REST
+                 ┌───────────────────────────┐
+                 │  React dashboard (Vite)    │
+                 │  Health score · Action     │
+                 │  Center · live log views   │
+                 └───────────────────────────┘
 ```
 
 ---
 
-## Features
+## Quick Start (recommended — `platform/`)
 
-### 🕵️ Agent — Monitoring Modules
-
-| Module | Tool | What it collects |
-|--------|------|-----------------|
-| `Network.sh` | tshark | Packets, IPs, ports — with blacklist/whitelist classification |
-| `Liveprocess.sh` | top | Real-time processes with threat flags |
-| `Process_info.sh` | ps | Full process snapshots |
-| `Memory.sh` | sar | Free, used, cached, buffers over time |
-| `File_monitoring.sh` | inotify | Create/modify/delete events with user attribution |
-| `Kernel.sh` | dmesg | Kernel messages and hardware events |
-| `iostat.sh` | iostat | Read/write throughput per device |
-| `ioping.sh` | ioping | I/O latency measurements |
-| `iotop.sh` | iotop | Per-process disk activity |
-| `memmapshlib.sh` | custom | Shared library memory mapping |
-
-All modules run **in parallel** as background processes and upload their output to AWS S3 every collection interval.
-
-### 📊 Dashboard — Views
-
-- **Network** — Packet table with blacklisted/whitelisted IP counts and filters
-- **File Integrity** — Chronological file event log with threat classification
-- **Process Inspector** — Snapshot tables with blacklisted process highlighting
-- **Memory Analytics** — Charts of memory usage metrics over time
-- **Live Process Feed** — Continuously updated process monitor
-- **Export** — Download all telemetry logs as a ZIP archive
-
----
-
-## Quick Start
-
-### Step 1 — Set up the EC2 receiver
+**Prerequisites:** Docker + Docker Compose.
 
 ```bash
-# Copy agent/Cloud/server.py and agent/Cloud/config.json to your EC2 instance
-# Fill in your S3 bucket name and AWS credentials in config.json
-pip3 install boto3
-python3 server.py
+cd platform
+docker compose up --build -d      # PostgreSQL + FastAPI
+docker compose run --rm seed      # load synthetic multi-device telemetry
 ```
 
-### Step 2 — Install and run the agent on your Linux machine
+Verify:
 
 ```bash
-cd agent/requirement
-chmod +x prerequisite.sh && sudo ./prerequisite.sh
+curl http://localhost:8000/health          # {"status":"ok"}
+# interactive API docs: http://localhost:8000/docs
 ```
 
+Run detection:
+
 ```bash
-# Edit agent/SERVICEFILE/config.json with your EC2 IP,
-# whitelisted processes, and IPs
-cd agent/SERVICEFILE
-chmod +x servicev2.sh
-sudo ./servicev2.sh
+docker compose run --rm detector                       # one-shot batch scan
+docker compose --profile realtime up -d stream         # real-time streaming detector
+docker compose --profile realtime run --rm streamgen \
+  sh -c "pip install -q -r requirements.txt && python stream_events.py --rate 20 --duration 40"
 ```
 
-You will be prompted to enter:
-1. EC2 public IP address
-2. Network interface to monitor (e.g. `eth0`, `ens3`)
-
-The agent displays available monitoring modules and lets you select which ones to run.
-
-### Step 3 — Run the dashboard
+Run the dashboard:
 
 ```bash
-# Backend
-cd dashboard/backend
-pip install -r requirements.txt
-cp .env.example .env    # add your AWS credentials
-python app.py           # http://localhost:5000
-```
-
-```bash
-# Frontend (new terminal)
-cd dashboard/frontend
+cd ../Linux_Sentinel/frontend
 npm install
-npm run dev             # http://localhost:5173
+npm run dev             # http://localhost:5173  (talks to the API on :8000)
 ```
 
----
+### Enable the AI analyst (optional)
+Get a free API key at **[build.nvidia.com](https://build.nvidia.com)**, then:
 
-## System Requirements
+```bash
+cd platform
+cp .env.example .env            # add NVIDIA_API_KEY (this file is git-ignored)
+docker compose up -d api
+```
 
-| Category | Requirement |
-|----------|-------------|
-| **Hardware** | Linux-based server or embedded board (256 MB RAM min) |
-| **Linux Kernel** | ≥ 5.4 |
-| **Python** | 3.10+ (dashboard backend) |
-| **Libraries** | libpcap, openssl, systemd |
-| **Cloud** | AWS EC2 (t2.micro) + S3 bucket + IAM role |
-
-Tested on: standard Linux servers, Raspberry Pi 4, Yocto-based automotive ECUs.
+> Detection works fully **without** a key — the AI layer only adds human-friendly explanations.
 
 ---
 
@@ -189,17 +168,26 @@ Tested on: standard Linux servers, Raspberry Pi 4, Yocto-based automotive ECUs.
 
 ```
 kurnicus/
-├── agent/                    # Linux telemetry collection agent
-│   ├── Cloud/                # EC2 receiver (server.py + config.json)
-│   ├── SERVICEFILE/          # Monitoring scripts + orchestrator (servicev2.sh)
-│   ├── Exploits/             # Benchmark & security testing scripts
-│   ├── requirement/          # Prerequisite installer
-│   └── Documentations/       # Docs & testing methodology
+├── platform/                     # ✅ Current stack (Postgres + FastAPI + Docker)
+│   ├── api/                      #   FastAPI: alerts, metrics, health score,
+│   │                             #   recommendations, AI insights (ai.py)
+│   ├── detector/                 #   detect.py (Isolation Forest, batch)
+│   │                             #   stream.py (River streaming, real-time)
+│   ├── db/                       #   schema.sql + migrations
+│   ├── seed/                     #   synthetic telemetry + live stream generator
+│   └── docker-compose.yml
 │
-└── dashboard/                # Visualization platform
-    ├── backend/              # Flask REST API (reads from S3)
-    └── frontend/             # React + Vite + MUI dashboard
+├── Linux_Sentinel/               # Web dashboard
+│   ├── frontend/                 #   React 18 + Vite + MUI + ApexCharts
+│   └── backend/                  #   legacy Flask API (superseded by platform/api)
+│
+└── FInal_OSTelem2/FInal_OSTelem/ # Legacy bash agent (v1: agent → EC2 → S3)
+    ├── SERVICEFILE/              #   telemetry scripts + orchestrator
+    ├── Cloud/                    #   EC2 receiver
+    └── requirement/, Exploits/, Documentations/
 ```
+
+> **Note:** the legacy bash-agent → EC2 → S3 pipeline (`FInal_OSTelem2/`) is the original v1 and still works; the `platform/` stack is the current, self-contained, real-time replacement.
 
 ---
 
@@ -207,57 +195,35 @@ kurnicus/
 
 | Layer | Technologies |
 |-------|-------------|
-| Agent | Bash, Python, tshark, inotify-tools, sysstat, iotop, ioping |
-| Backend | Python, Flask, Flask-CORS, boto3 |
-| Frontend | React 18, Vite, Material UI, ApexCharts, React Router, Axios |
-| Cloud | AWS S3, AWS EC2 |
+| Data store | PostgreSQL 16 (JSONB events, `LISTEN/NOTIFY`) |
+| API | FastAPI, asyncpg, Uvicorn |
+| Detection | River (Half-Space Trees), scikit-learn (Isolation Forest), NumPy |
+| AI | NVIDIA NIM (OpenAI-compatible), `openai` client |
+| Frontend | React 18, Vite, Material UI, ApexCharts, Axios |
+| Orchestration | Docker Compose |
+| Legacy agent | Bash, tshark, sysstat, iotop, ioping, boto3, AWS S3/EC2 |
 
 ---
 
-## Exploit & Benchmark Testing
+## Compliance & Standards
 
-The `agent/Exploits/` folder contains scripts for validating detection coverage:
-
-- `audit.sh` — Audit-based attack simulations
-- `Benchmark_Testing.sh` — CPU/memory stress tests to validate resource monitoring
-- `netben.sh` — Network traffic benchmarking
-
-> These are for **authorized security testing only** on systems you own or have explicit permission to test.
-
----
-
-## Compliance
-
-Kurnicus is designed to support compliance with:
-
-- **ISO 21434** — Road vehicles cybersecurity engineering (automotive)
-- **NIST CSF** — National Institute of Standards and Technology Cybersecurity Framework
-
-Data is transmitted via HTTPS with end-to-end encryption and integrity checks.
+- **UN Regulation No. 155** — automotive cybersecurity; CAN bus alerts map to Annex 5 threat categories (message injection §4.3.6, DoS §4.3.1).
+- **ISO/SAE 21434** — road-vehicle cybersecurity engineering (Spoofing / Availability / Tampering threat classes).
+- **MITRE ATT&CK** — every alert carries the most relevant technique id (e.g. T1496 resource hijacking, T1110 brute force, T1071 C2, T1003 credential access).
 
 ---
 
 ## Target Users
 
-- **IoT & Embedded Device Manufacturers** — monitor constrained Linux devices at scale
-- **Automotive Software Engineers** — runtime security for ECUs and Linux-based vehicle systems
-- **DevOps / SecOps teams** — unified observability across Linux fleets without the overhead
-
----
-
-## Compared to Alternatives
-
-| Tool | Overhead | IoT-Ready | Real-Time | Zero Config | Unified Stream |
-|------|----------|-----------|-----------|-------------|----------------|
-| **Kurnicus** | <3% CPU | ✅ | ✅ | ✅ | ✅ |
-| Falco (CNCF) | High | ❌ | ✅ | ❌ | ❌ |
-| Wazuh | High | ❌ | Partial | ❌ | ❌ |
-| Osquery | Medium | ❌ | ❌ | ❌ | ❌ |
+- **Automotive** — runtime intrusion detection for Linux-based ECUs and in-vehicle networks
+- **IoT & embedded** — behavioural monitoring for constrained devices at scale
+- **Industrial / OT, medical, kiosks** — configurable telemetry + detection for any Linux endpoint
+- **DevOps / SecOps** — unified, low-overhead observability across a Linux fleet
 
 ---
 
 ## ⚠️ Security
 
-- Never commit real AWS credentials — use `.env` files (see `dashboard/backend/.env.example`)
-- `agent/Cloud/config.json` contains placeholder values — fill in your own before deploying
-- Scripts in `Exploits/` are for **authorized testing only** on systems you own
+- **No secrets in the repo.** Credentials load from environment variables / `.env` files (git-ignored). `platform/.env.example` documents the AI key; `platform/.env` is never committed.
+- The legacy `FInal_OSTelem2/.../Cloud/config.json` uses placeholder values — fill in your own before deploying.
+- Scripts under `Exploits/` are for **authorized security testing only**, on systems you own or have explicit permission to test.
