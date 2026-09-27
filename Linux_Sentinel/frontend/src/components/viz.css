@@ -1,0 +1,130 @@
+/* Shared visualization widgets used across the monitoring pages. */
+
+.viz-cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.viz-card {
+  background: #263043;
+  border-radius: 10px;
+  padding: 18px 22px;
+  min-width: 160px;
+  flex: 1;
+  border-left: 4px solid #2196f3;
+}
+
+.viz-card.good { border-left-color: #43a047; }
+.viz-card.warn { border-left-color: #fb8c00; }
+.viz-card.bad  { border-left-color: #e53935; }
+
+.viz-card-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.viz-card-value small { font-size: 15px; color: #90a4ae; margin-left: 3px; }
+
+.viz-card-label {
+  font-size: 13px;
+  color: #9fb3c8;
+  margin-top: 8px;
+}
+
+.viz-status {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.viz-status.good { background: #14351f; color: #7bd88f; }
+.viz-status.warn { background: #3a2c10; color: #ffc27a; }
+.viz-status.bad  { background: #3a1414; color: #ff8a8a; }
+
+.viz-chart-card {
+  background: #263043;
+  border-radius: 10px;
+  padding: 16px 18px 6px;
+  margin-bottom: 20px;
+}
+
+.viz-chart-title {
+  color: #cdd9e5;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.viz-section-toggle {
+  background: none;
+  border: none;
+  color: #6fb3ff;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 0;
+  margin-bottom: 8px;
+}
+.viz-section-toggle:hover { text-decoration: underline; }
+
+/* "Why?" button + generic explanation modal (reusable across pages) */
+.why-btn {
+  margin-left: 8px;
+  background: #3a1414;
+  color: #ff8a8a;
+  border: 1px solid #5a2020;
+  border-radius: 5px;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.why-btn:hover { background: #4a1a1a; }
+
+.detail-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+.detail-modal {
+  background: #1c2636; border: 1px solid #e53935; border-radius: 12px;
+  width: 100%; max-width: 560px; max-height: 85vh; display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.detail-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid #2f3d54;
+  color: #ff8a8a; font-weight: 700; font-size: 16px;
+}
+.detail-close { background: none; border: none; color: #9fb3c8; font-size: 26px; line-height: 1; cursor: pointer; }
+.detail-close:hover { color: #fff; }
+.detail-body { padding: 18px 20px; overflow-y: auto; }
+.detail-sec { margin-bottom: 16px; }
+.detail-label {
+  color: #6fb3ff; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.detail-body, .detail-sec div { color: #e6edf3; font-size: 14px; line-height: 1.55; }
+.detail-list { margin: 6px 0 0; padding-left: 18px; }
+.detail-list li { margin-bottom: 6px; }
+
+/* Value-aware one-line interpretation shown above the cards on each tab */
+.viz-summary {
+  background: #22304a;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  color: #dbe6f2;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.viz-summary b { color: #fff; }
+.viz-summary.alert { border-left: 4px solid #e53935; }
+.viz-summary.ok { border-left: 4px solid #43a047; }

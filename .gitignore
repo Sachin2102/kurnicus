@@ -1,29 +1,36 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-venv/
+# ---- Secrets (NEVER commit) ----
 .env
-*.egg-info/
+*.env
+!*.env.example
+platform/.env
 
-# Node
+# ---- Node / frontend ----
 node_modules/
 dist/
 .vite/
+*.log
+npm-debug.log*
 
-# Logs / downloads (generated at runtime)
-dashboard/backend/downloads/*.txt
-dashboard/backend/myzipfile.zip
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
 
-# IDE
-.idea/
-.vscode/
-*.iml
+# ---- Build / runtime artifacts ----
+Linux_Sentinel/backend/downloads/
+Linux_Sentinel/backend/*.zip
+*.pkl
 
-# Temp files
-~$*
-*.tmp
-
-# OS
+# ---- OS / editor ----
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Office lock/temp files
+~$*
+*.tmp

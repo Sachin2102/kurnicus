@@ -1,0 +1,94 @@
+# Kurnicus local dev stack.
+#   docker compose up --build        -> db + api come up
+#   docker compose run --rm seed     -> load synthetic telemetry
+# API:      http://localhost:8000  (docs at /docs)
+# Postgres: localhost:5432 (kurnicus/kurnicus)
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: kurnicus
+      POSTGRES_PASSWORD: kurnicus
+      POSTGRES_DB: kurnicus
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # schema.sql runs automatically on first init of an empty data volume
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kurnicus"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgresql://kurnicus:kurnicus@db:5432/kurnicus
+      # AI SOC analyst (Phase 4). Put NVIDIA_API_KEY in platform/.env (uncommitted).
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:-}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-meta/llama-3.1-8b-instruct}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Detection worker. One-shot: `docker compose run --rm detector`
+  # Continuous:     `docker compose run --rm detector python detect.py --loop 30`
+  detector:
+    build: ./detector
+    environment:
+      DATABASE_URL: postgresql://kurnicus:kurnicus@db:5432/kurnicus
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Real-time streaming detector (event-driven, River online ML).
+  # Start: docker compose --profile realtime up stream
+  stream:
+    build: ./detector
+    command: python stream.py
+    profiles: ["realtime"]
+    environment:
+      DATABASE_URL: postgresql://kurnicus:kurnicus@db:5432/kurnicus
+      MODEL_PATH: /models/state.pkl
+    volumes:
+      - modeldata:/models   # per-host baselines persist across restarts
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Live telemetry generator that feeds the streaming detector.
+  # Start: docker compose --profile realtime run --rm streamgen
+  streamgen:
+    image: python:3.12-slim
+    working_dir: /seed
+    command: sh -c "pip install --no-cache-dir -r requirements.txt >/dev/null && python stream_events.py"
+    profiles: ["realtime"]
+    environment:
+      DATABASE_URL: postgresql://kurnicus:kurnicus@db:5432/kurnicus
+    volumes:
+      - ./seed:/seed
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # One-shot job: `docker compose run --rm seed`
+  seed:
+    image: python:3.12-slim
+    working_dir: /seed
+    environment:
+      DATABASE_URL: postgresql://kurnicus:kurnicus@db:5432/kurnicus
+    volumes:
+      - ./seed:/seed
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && python generate_seed.py"
+
+volumes:
+  pgdata:
+  modeldata:
