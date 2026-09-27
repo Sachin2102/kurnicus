@@ -211,6 +211,14 @@ Already have: network, processes, memory, files, kernel-audit(defined), CAN bus 
   - Plus existing per-tab: InfoBanner (plain English), AiInsights button (🤖 on-demand AI), status badges, and Network per-row "Why?" modal (what/why/how).
 - Latency note: bulk re-seed floods the live detector's NOTIFY queue → inflates metrics (saw 2828ms). FIX for clean demo numbers: `UPDATE events SET scored_at=NULL, detect_latency_ms=NULL;` then run a controlled `streamgen`. After that: clean **3.46ms avg / 4.17ms p95**.
 
+## 4m. GITHUB SET UP + PUSHED ✅ (2026-09-27)
+- Local `E:\Project\Kurnicus` is now a git repo: remote `origin` = https://github.com/Sachin2102/kurnicus.git, branch `main` (tracks origin/main). Push with plain `git push`.
+- Adopted existing remote history (git init → fetch → `git reset origin/main`), so history preserved. Remote's `dashboard/frontend/*` was detected as renames of our `Linux_Sentinel/frontend/*` (same content, relocated). Preserved the remote README.md (it's a good badge-rich readme, describes OLD Flask/AWS arch — worth updating later to reflect platform/).
+- **.gitignore** created (root): excludes `.env`/`*.env` (keeps `.env.example`), node_modules, venv, `__pycache__`, `*.pkl`, downloads/zip, `~$*` office temp. Verified NVIDIA key (platform/.env) NOT committed — only the `nvapi-xxxx` placeholder in .env.example.
+- **GitHub push protection blocked the first push** on the hardcoded AWS key in `Linux_Sentinel/backend/app.py:14-16`. FIXED properly: removed hardcoded creds, now reads from env/IAM (`os.environ.setdefault('AWS_DEFAULT_REGION',...)`). Also redacted the AWS key string from memory.md. Amended commit, push succeeded (commit f5b18fb).
+- NOTE: the (fake, per user) AWS key still exists in OLDER remote history (pre-existing commits under dashboard/backend). If it were ever real it must be rotated + history purged; user said it's a docs placeholder.
+- gh CLI not installed; used plain git. Git Credential Manager (system) handled auth.
+
 ## 4d. NEXT STEPS (automotive / low-power product roadmap)
 **DONE ✅:** Phase 1 foundation, frontend wiring, batch detection, Alerts UI, AI analyst (modal), real-time streaming detection (~3ms), metrics.
 **DONE:** ~~1 model persistence~~ ✅, ~~2 footprint proof~~ ✅ (154MB/0% idle), ~~4 automotive CAN bus + ISO21434/UNR155~~ ✅, whole-UI visual overhaul ✅.
