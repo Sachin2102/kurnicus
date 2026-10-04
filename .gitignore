@@ -34,3 +34,7 @@ Thumbs.db
 # Office lock/temp files
 ~$*
 *.tmp
+
+# Submission materials (kept local only)
+docs/
+SUBMISSION.md
