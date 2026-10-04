@@ -21,6 +21,16 @@
 
 ---
 
+## Screenshots
+
+| Dashboard — health score, live metrics, "what needs attention" | AI SOC Analyst — plain-English explanation + fix |
+|---|---|
+| ![Dashboard](docs/screenshots/01-dashboard.jpg) | ![AI analyst](docs/screenshots/05-ai-soc-analyst.jpg) |
+| **Live Process — crypto-miner caught (red)** | **Network — safe vs. suspicious** |
+| ![Live process](docs/screenshots/03-live-process-miner.jpg) | ![Network](docs/screenshots/04-network.jpg) |
+
+---
+
 ## What is Kurnicus?
 
 Kurnicus is a **host-based security monitoring and anomaly-detection platform** for Linux and edge devices. It collects OS telemetry (network, processes, memory, files, logins, and vehicle CAN bus), learns each device's *normal* behaviour, and flags anomalies **in real time** — then an optional AI analyst turns each alert into a plain-English explanation with a recommended fix.
